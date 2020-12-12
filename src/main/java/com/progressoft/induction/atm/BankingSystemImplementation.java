@@ -67,10 +67,10 @@ public class BankingSystemImplementation implements BankingSystem {
                 BigDecimal balanceInSystem = result.getBigDecimal("Balance");
 
                 if (accountNumber.equals(accountNumberInSystemString)) {
-                    BigDecimal subtract = balanceInSystem.subtract(amount);
+                   /* BigDecimal subtract = balanceInSystem.subtract(amount);
                     String query = "update Accounts set Balance = subtract where accountNumber.equals(accountNumberInSystemString)";
                     PreparedStatement prepare = connectionObject.prepareStatement(query);
-                    prepare.execute();
+                    prepare.execute();*/
                 }
 
             }
