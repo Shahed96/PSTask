@@ -1,6 +1,7 @@
 package com.progressoft.induction.atm;
 
 import com.progressoft.induction.atm.exceptions.AccountNotFoundException;
+import com.progressoft.induction.atm.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -9,75 +10,96 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BankingSystemImplementation implements BankingSystem {
 
-    public static String host = "jdbc:derby://localhost:1527/Initial Balances"; 
-    public static String userName = "User1";
-    public static String passward = "123456";
+    public static Connection connect() throws ClassNotFoundException {
 
-    
-    @Override
-    public BigDecimal getAccountBalance(String accountNumber) {
+        Connection con;
+
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        String connectionURL = "jdbc:sqlserver://localhost:1433;databaseName=BankingSystem;user=admin;password=123456";
 
         try {
 
-            Connection connectionObject;
-            connectionObject = DriverManager.getConnection(host, userName, passward);
-            Statement stm = connectionObject.createStatement();
-            String SQL = "SELECT * FROM Accounts";
-            ResultSet result = stm.executeQuery(SQL);
+            con = DriverManager.getConnection(connectionURL);
+            //needs SQLExption
 
-            while (result.next()) {
+            return con;
 
-                int accountNumberInSystemInteger = result.getInt("Account_Number");
-                String accountNumberInSystemString = Integer.toString(accountNumberInSystemInteger);
-                BigDecimal balanceInSystem = result.getBigDecimal("Balance");
+        } catch (SQLException e) {
 
-                if (accountNumber.equals(accountNumberInSystemString)) {
-                    return balanceInSystem;
+            System.out.println(e);
+
+        }
+        return null;
+    }
+
+    @Override
+    public BigDecimal getAccountBalance(String accountNumber) {
+        BigDecimal AccountBalance = null;
+        try {
+            Connection con = connect();
+            Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery("select * from InitialBalance");
+
+            while (rs.next()) {
+                int accountNumberInSystemInteger = rs.getInt("AccountNumber");
+                int balanceInSystem = rs.getInt("Balance");
+                String accountNumberInSystemString = String.valueOf(accountNumberInSystemInteger);
+                if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
+
+                    return BigDecimal.valueOf(balanceInSystem);
+
                 }
-
             }
             throw new AccountNotFoundException(accountNumber);
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
 
+        } catch (ClassNotFoundException ex) {
+            //Logger.getLogger(BankingSystemImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return null;
     }
 
     @Override
     public void debitAccount(String accountNumber, BigDecimal amount) {
-
+        BigDecimal balanceInSystemBigDecimal;
         try {
+            Connection con = connect();
+            Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery("select * from InitialBalance");
+            while (rs.next()) {
+                int accountNumberInSystemInteger = rs.getInt("AccountNumber");
+                int balanceInSystem = rs.getInt("Balance");
+                String accountNumberInSystemString = String.valueOf(accountNumberInSystemInteger);
+                if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
+                    balanceInSystemBigDecimal = BigDecimal.valueOf(balanceInSystem);
+                    if (amount.compareTo(balanceInSystemBigDecimal) == -1) {
+                        throw new InsufficientFundsException();
+                    }
 
-            Connection connectionObject;
-            connectionObject = DriverManager.getConnection(host, userName, passward);
-            Statement stm = connectionObject.createStatement();
-            String SQL = "SELECT * FROM Accounts";
-            ResultSet result = stm.executeQuery(SQL);
+                    balanceInSystemBigDecimal = balanceInSystemBigDecimal.subtract(amount);
+                    int balanceInSystemNew = balanceInSystemBigDecimal.toBigInteger().intValueExact();
 
-            while (result.next()) {
+                    ///update: balanceInSystem=amount;
+                    String query = "update InitialBalance set Balance = ? where AccountNumber = accountNumber";
+                    PreparedStatement preparedStmt = con.prepareStatement(query);
+                    preparedStmt.setInt(2, balanceInSystemNew);
 
-                int accountNumberInSystemInteger = result.getInt("Account_Number");
-                String accountNumberInSystemString = Integer.toString(accountNumberInSystemInteger);
-                BigDecimal balanceInSystem = result.getBigDecimal("Balance");
-
-                if (accountNumber.equals(accountNumberInSystemString)) {
-                   /* BigDecimal subtract = balanceInSystem.subtract(amount);
-                    String query = "update Accounts set Balance = subtract where accountNumber.equals(accountNumberInSystemString)";
-                    PreparedStatement prepare = connectionObject.prepareStatement(query);
-                    prepare.execute();*/
                 }
-
             }
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
 
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(BankingSystemImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

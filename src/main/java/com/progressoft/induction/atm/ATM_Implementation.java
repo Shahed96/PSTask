@@ -17,6 +17,7 @@ public class ATM_Implementation implements ATM {
        
 
         BankingSystemImplementation object = new BankingSystemImplementation();
+////////////////////////////////////////////////////////////////////////////////////////
 
         BigDecimal balanceInSystem = object.getAccountBalance(accountNumber);
         int equals = balanceInSystem.compareTo(amount); //compare between two bigDecimal objects 
@@ -27,6 +28,7 @@ public class ATM_Implementation implements ATM {
             throw new InsufficientFundsException();
 
         }
+        
 
         //withdraw:
         if (amount.compareTo (new BigDecimal("230.0"))==1)
