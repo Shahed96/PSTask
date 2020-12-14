@@ -17,21 +17,20 @@ public class ATM_Implementation implements ATM {
        
 
         BankingSystemImplementation object = new BankingSystemImplementation();
-////////////////////////////////////////////////////////////////////////////////////////
+
 
         BigDecimal balanceInSystem = object.getAccountBalance(accountNumber);
-        int equals = balanceInSystem.compareTo(amount); //compare between two bigDecimal objects 
+        int equals = amount.compareTo(balanceInSystem); //compare between two bigDecimal objects 
 
-        if ((equals == 0 || equals == 1)) {
-            object.debitAccount(accountNumber, amount); //subtact two bigdacimal objects
-        } else if (equals == -1) {
+     
+            if (equals == 1) 
             throw new InsufficientFundsException();
 
-        }
+      object.debitAccount(accountNumber, amount);
         
 
         //withdraw:
-        if (amount.compareTo (new BigDecimal("230.0"))==1)
+        if (amount.compareTo (new BigDecimal(4000.0))==1)
         {
         throw new NotEnoughMoneyInATMException();
         }

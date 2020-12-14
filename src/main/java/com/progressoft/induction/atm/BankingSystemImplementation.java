@@ -80,7 +80,7 @@ public class BankingSystemImplementation implements BankingSystem {
                 String accountNumberInSystemString = String.valueOf(accountNumberInSystemInteger);
                 if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
                     balanceInSystemBigDecimal = BigDecimal.valueOf(balanceInSystem);
-                    if (amount.compareTo(balanceInSystemBigDecimal) == -1) {
+                    if (amount.compareTo(balanceInSystemBigDecimal) == 1) {
                         throw new InsufficientFundsException();
                     }
 
