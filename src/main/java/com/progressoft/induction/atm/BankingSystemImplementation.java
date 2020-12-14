@@ -51,11 +51,12 @@ public class BankingSystemImplementation implements BankingSystem {
                 int balanceInSystem = rs.getInt("Balance");
                 String accountNumberInSystemString = String.valueOf(accountNumberInSystemInteger);
                 if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
-
+                       con.close();
                     return BigDecimal.valueOf(balanceInSystem);
 
                 }
             }
+             con.close();
             throw new AccountNotFoundException(accountNumber);
 
         } catch (SQLException e) {
@@ -81,6 +82,7 @@ public class BankingSystemImplementation implements BankingSystem {
                 if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
                     balanceInSystemBigDecimal = BigDecimal.valueOf(balanceInSystem);
                     if (amount.compareTo(balanceInSystemBigDecimal) == 1) {
+                         con.close();
                         throw new InsufficientFundsException();
                     }
 
@@ -91,7 +93,7 @@ public class BankingSystemImplementation implements BankingSystem {
                     String query = "update InitialBalance set Balance = ? where AccountNumber = accountNumber";
                     PreparedStatement preparedStmt = con.prepareStatement(query);
                     preparedStmt.setInt(2, balanceInSystemNew);
-
+                    con.close();
                 }
             }
 
