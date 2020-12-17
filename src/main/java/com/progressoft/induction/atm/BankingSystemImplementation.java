@@ -72,17 +72,18 @@ public class BankingSystemImplementation implements BankingSystem {
     public void debitAccount(String accountNumber, BigDecimal amount) {
         BigDecimal balanceInSystemBigDecimal;
         try {
-            Connection con = connect();
-            Statement stm = con.createStatement();
-            ResultSet rs = stm.executeQuery("select * from InitialBalance");
-            while (rs.next()) {
-                int accountNumberInSystemInteger = rs.getInt("AccountNumber");
-                int balanceInSystem = rs.getInt("Balance");
+            Connection connection = connect();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select * from InitialBalance");
+            while (result.next()) {
+                int accountNumberInSystemInteger = result.getInt("AccountNumber");
+                int balanceInSystem = result.getInt("Balance");
                 String accountNumberInSystemString = String.valueOf(accountNumberInSystemInteger);
                 if (accountNumberInSystemString.equalsIgnoreCase(accountNumber)) {
                     balanceInSystemBigDecimal = BigDecimal.valueOf(balanceInSystem);
                     if (amount.compareTo(balanceInSystemBigDecimal) == 1) {
-                         con.close();
+                         connection.close();
+                         statement.close();
                         throw new InsufficientFundsException();
                     }
 
@@ -91,9 +92,10 @@ public class BankingSystemImplementation implements BankingSystem {
 
                     ///update: balanceInSystem=amount;
                     String query = "update InitialBalance set Balance = ? where AccountNumber = accountNumber";
-                    PreparedStatement preparedStmt = con.prepareStatement(query);
+                    PreparedStatement preparedStmt = connection.prepareStatement(query);
                     preparedStmt.setInt(2, balanceInSystemNew);
-                    con.close();
+                    connection.close();
+                    statement.close();
                 }
             }
 
